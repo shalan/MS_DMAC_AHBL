@@ -18,7 +18,7 @@
 `timescale          1ns/1ps
 `default_nettype    none
 
-`include            "ahb_util.vh"
+`include            "ahbl_util.vh"
 
 /*
     DMA Controller
