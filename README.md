@@ -3,7 +3,7 @@ Direct Memory Access Controller (DMAC) with AHB-lite bus interface.
 
 ## Interfaces
 
-<img src="./docs/bb.svg" width="80%" alt= “” >
+<img src="./docs/bb.svg" width="60%" alt= “” >
 
 ## Ports
 
@@ -32,9 +32,9 @@ Direct Memory Access Controller (DMAC) with AHB-lite bus interface.
 ## Slave Registers
 | Address | Description |
 | --------- | --------- |
-|00 |Control Register <br>``0: EN ``<br>``8-11: Transfer trigger; only 0000 (S/W) is supported`` <br>``16-17: Source data type; 0: byte, 1: half word, 2: word`` <br>``18: Source Address Auto increment`` <br>``24-25: Destination data type; 0: byte, 1: half word, 2: word`` <br>``26: Destination Address Auto increment`` |
-|04 |Status Register <br>``0: Done`` |
-|08 |Source Address Register |
-|0C |Destination Address Register |
-|10 |Count Register |
-|14 |SW Trigger Register|
+|``0x00`` |Control Register <br>``0: EN ``<br>``8-11: Transfer trigger; only 0000 (S/W) is supported`` <br>``16-17: Source data type; 0: byte, 1: half word, 2: word`` <br>``18: Source Address Auto increment`` <br>``24-25: Destination data type; 0: byte, 1: half word, 2: word`` <br>``26: Destination Address Auto increment`` |
+|``0x04`` |Status Register <br>``0: Done`` |
+|``0x08`` |Source Address Register |
+|``0x0C`` |Destination Address Register |
+|``0x10`` |Count Register |
+|``0x14`` |SW Trigger Register|
