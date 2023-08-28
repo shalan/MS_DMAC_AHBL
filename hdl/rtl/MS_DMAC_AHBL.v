@@ -1,5 +1,4 @@
 /*
-
 	Copyright 2020 Mohamed Shalan
 	
 	Licensed under the Apache License, Version 2.0 (the "License"); 
@@ -36,7 +35,7 @@
     10: Size Register
     14: SW Trigger
 */
-module AHB_DMAC_1CH (
+module MS_AHB_DMAC (
     input               HCLK,
     input               HRESETn,
     
@@ -62,14 +61,17 @@ module AHB_DMAC_1CH (
     assign      STATUS_REG  = {31'h0,done};
     assign      IRQ         = done;
 
-    `AHB_SLAVE_EPILOGUE()
-    // (name, size, offset, init, prefix)
-    `AHB_REG(CTRL_REG, 20, CTRL_REG_OFF, 0,)   
-    `AHB_REG(SADDR_REG, 32, SADDR_REG_OFF, 0,)
-    `AHB_REG(DADDR_REG, 32, DADDR_REG_OFF, 0,)
-    `AHB_REG(SIZE_REG, 16, SIZE_REG_OFF, 0,)
-    //`AHB_REG(TRIG_REG, 1, TRIG_REG_OFF, 0,) 
-    
+    //
+    // AHB Slave Logic
+    //
+
+    `AHB_SLAVE_EPILOGUE
+
+    `AHB_REG(CTRL_REG, 20, CTRL_REG_OFF, 0)   
+    `AHB_REG(SADDR_REG, 32, SADDR_REG_OFF, 0)
+    `AHB_REG(DADDR_REG, 32, DADDR_REG_OFF, 0)
+    `AHB_REG(SIZE_REG, 16, SIZE_REG_OFF, 0)
+     
     reg             TRIG_REG;
     wire TRIG_REG_sel = wr_enable & (last_HADDR[7:0] == TRIG_REG_OFF);
     always @(posedge HCLK or negedge HRESETn)
@@ -84,11 +86,11 @@ module AHB_DMAC_1CH (
 
     // CTRL Register Fields
     `REG_FIELD(CTRL_REG, EN, 0, 0)
-    `REG_FIELD(CTRL_REG, TRIGGER, 1, 4)
-    `REG_FIELD(CTRL_REG, SRC_TYPE, 8, 9)
-    `REG_FIELD(CTRL_REG, SRC_AI, 10, 10)
-    `REG_FIELD(CTRL_REG, DEST_TYPE, 16, 17)
-    `REG_FIELD(CTRL_REG, DEST_AI, 18, 18)
+    `REG_FIELD(CTRL_REG, TRIGGER, 8, 11)
+    `REG_FIELD(CTRL_REG, SRC_TYPE, 16, 17)
+    `REG_FIELD(CTRL_REG, SRC_AI, 18, 18)
+    `REG_FIELD(CTRL_REG, DEST_TYPE, 24, 25)
+    `REG_FIELD(CTRL_REG, DEST_AI, 26, 26)
 
     `AHB_READ
         `AHB_REG_READ(CTRL_REG, CTRL_REG_OFF)
@@ -99,7 +101,9 @@ module AHB_DMAC_1CH (
         `AHB_REG_READ(TRIG_REG, TRIG_REG_OFF)
         32'hDEADBEEF; 
 
+    //
     // AHB MAster Logic
+    //
 
     // The DMAC FSM
     localparam  IDLE_STATE  =   5'b00001,
