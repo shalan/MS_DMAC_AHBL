@@ -14,7 +14,7 @@
 	limitations under the License.
 */
 
-`define     SLAVE_OFF_BITS   last_HADDR[7:0]
+`define     SLAVE_OFF_BITS   last_HADDR[15:0]
 
 `define AHB_REG(name, size, offset, init)   \
         reg [size-1:0] name; \
@@ -32,110 +32,26 @@
 
 `define AHB_REG_READ(name, offset) (`SLAVE_OFF_BITS == offset) ? name : 
 
-`define AHB_SLAVE_IFC   \
-    input wire          HSEL,\
-    input wire [31:0]   HADDR,\
-    input wire [1:0]    HTRANS,\
-    input wire          HWRITE,\
-    input wire          HREADY,\
-    input wire [31:0]   HWDATA,\
-    input wire [2:0]    HSIZE,\
-    output wire         HREADYOUT,\
-    output wire [31:0]  HRDATA
+`define AHB_SLAVE_IFC(prefix)   \
+    input wire          ``prefix``HSEL,\
+    input wire [31:0]   ``prefix``HADDR,\
+    input wire [1:0]    ``prefix``HTRANS,\
+    input wire          ``prefix``HWRITE,\
+    input wire          ``prefix``HREADY,\
+    input wire [31:0]   ``prefix``HWDATA,\
+    input wire [2:0]    ``prefix``HSIZE,\
+    output wire         ``prefix``HREADYOUT,\
+    output wire [31:0]  ``prefix``HRDATA
 
-`define AHB_SLAVE_RO_IFC   \
-    input               HSEL,\
-    input wire [31:0]   HADDR,\
-    input wire [1:0]    HTRANS,\
-    input wire          HWRITE,\
-    input wire          HREADY,\
-    input wire [2:0]    HSIZE,\
-    output wire         HREADYOUT,\
-    output wire [31:0]  HRDATA
-
-`define AHB_SLAVE_BUS_IFC(prefix)   \
-    output wire        ``prefix``_HSEL,\
-    input wire         ``prefix``_HREADYOUT,\
-    input wire [31:0]  ``prefix``_HRDATA
-
-`define AHB_SLAVE_SIGNALS(prefix)\
-    wire         ``prefix``_HSEL;\
-    wire         ``prefix``_HREADYOUT;\
-    wire [31:0]  ``prefix``_HRDATA;    
-
-`define AHB_SLAVE_CONN(prefix)   \
-        .``prefix``_HSEL(``prefix``_HSEL),\
-        .``prefix``_HADDR(HADDR),\
-        .``prefix``_HTRANS(HTRANS),\
-        .``prefix``_HWRITE(HWRITE),\
-        .``prefix``_HREADY(HREADY),\
-        .``prefix``_HWDATA(HWDATA),\
-        .``prefix``_HSIZE(HSIZE),\
-        .``prefix``_HREADYOUT(``prefix``_HREADYOUT),\
-        .``prefix``_HRDATA(``prefix``_HRDATA)
-
-`define AHB_SLAVE_BUS_CONN(prefix)   \
-        .``prefix``_HSEL(``prefix``_HSEL),\
-        .``prefix``_HREADYOUT(``prefix``_HREADYOUT),\
-        .``prefix``_HRDATA(``prefix``_HRDATA)
-
-`define AHB_SLAVE_INST_CONN(prefix)   \
-        .HSEL(``prefix``_HSEL),\
-        .HADDR( HADDR),\
-        .HTRANS(HTRANS),\
-        .HWRITE(HWRITE),\
-        .HREADY(HREADY),\
-        .HWDATA(HWDATA),\
-        .HSIZE( HSIZE),\
-        .HREADYOUT(``prefix``_HREADYOUT),\
-        .HRDATA(``prefix``_HRDATA)
-
-`define AHB_SLAVE_INST_CONN_NP   \
-        .HSEL(HSEL),\
-        .HADDR( HADDR),\
-        .HTRANS(HTRANS),\
-        .HWRITE(HWRITE),\
-        .HREADY(HREADY),\
-        .HWDATA(HWDATA),\
-        .HSIZE( HSIZE),\
-        .HREADYOUT(HREADYOUT),\
-        .HRDATA(HRDATA)
 
 `define AHB_MASTER_IFC(prefix) \
-    output wire [31:0]  HADDR,\
-    output wire [1:0]   HTRANS,\
-    output wire [2:0] 	HSIZE,\
-    output wire         HWRITE,\
-    output wire [31:0]  HWDATA,\
-    input wire          HREADY,\
-    input wire [31:0]   HRDATA 
-
-`define AHB_MASTER_BUS_IFC(prefix) \
-    input wire [31:0]   HADDR,\
-    input wire [1:0]    HTRANS,\
-    input wire [2:0]    HSIZE,\
-    input wire          HWRITE,\
-    input wire [31:0]   HWDATA,\
-    output wire         HREADY,\
-    output wire [31:0]  HRDATA 
-
-`define AHB_MASTER_CONN \
-        .HADDR( HADDR),\
-        .HTRANS(HTRANS),\
-        .HSIZE( HSIZE),\
-        .HWRITE(HWRITE),\
-        .HWDATA(HWDATA),\
-        .HREADY(HREADY),\
-        .HRDATA(HRDATA) 
-
-`define AHB_MASTER_SIGNALS(prefix) \
-    wire [31:0]  ``prefix``_HADDR;\
-    wire [1:0]   ``prefix``_HTRANS;\
-    wire [2:0] 	 ``prefix``_HSIZE;\
-    wire         ``prefix``_HWRITE;\
-    wire [31:0]  ``prefix``_HWDATA;\
-    wire         ``prefix``_HREADY;\
-    wire [31:0]  ``prefix``_HRDATA; 
+    output wire [31:0]  ``prefix``HADDR,\
+    output wire [1:0]   ``prefix``HTRANS,\
+    output wire [2:0] 	``prefix``HSIZE,\
+    output wire         ``prefix``HWRITE,\
+    output wire [31:0]  ``prefix``HWDATA,\
+    input wire          ``prefix``HREADY,\
+    input wire [31:0]   ``prefix``HRDATA 
 
 
 `define AHB_SLAVE_EPILOGUE \
