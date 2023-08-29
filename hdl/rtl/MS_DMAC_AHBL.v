@@ -35,7 +35,7 @@
     10: Size Register
     14: SW Trigger
 */
-module MS_AHB_DMAC (
+module MS_DMAC_AHBL (
     input               HCLK,
     input               HRESETn,
     
