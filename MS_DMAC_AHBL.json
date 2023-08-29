@@ -1,0 +1,146 @@
+{
+    "info": {
+        "name": "MS_DMAC_AHBL",
+        "description": "Direct Memory Access Controller (DMAC) with AHB-lite bus interface.",
+        "repo": "https://github.com/shalan/MS_DMAC_AHBL",
+        "owner": "Mohamed Shalan",
+        "license": "Apache 2.0",
+        "author": "Mohamed Shalan",
+        "email": "mshalan@aucegypt.edu",
+        "version": "v1.0.0",
+        "date": "1-01-2020",
+        "category": "digital",
+        "tags": [
+            "DMA"
+        ],
+        "bus": [
+            "AHBL"
+        ],
+        "type": "soft",
+        "status": "verified",
+        "cell_count": "850",
+        "width": "0.0",
+        "height": "0.0",
+        "technology": "n/a",
+        "clock_freq_mhz": "40",
+        "supply_voltage": [
+            "n/a"
+        ]
+    },
+    "regs": [
+        {
+            "name": "control",
+            "size": "32",
+            "mode": "rw",
+            "init": "0",
+            "fields": [
+                {
+                    "name": "en",
+                    "from": "0",
+                    "size": "1",
+                    "port": ""
+                },
+                {
+                    "name": "trig",
+                    "from": "8",
+                    "size": "4",
+                    "port": ""
+                },
+                {
+                    "name": "stype",
+                    "from": "16",
+                    "size": "2",
+                    "port": ""
+                },
+                {
+                    "name": "sai",
+                    "from": "18",
+                    "size": "1",
+                    "port": ""
+                },
+                {
+                    "name": "dtype",
+                    "from": "24",
+                    "size": "2",
+                    "port": ""
+                }
+            ]
+        },
+        {
+            "name": "status",
+            "size": "1",
+            "mode": "ro",
+            "fields": [
+                {
+                    "name": "done",
+                    "from": "0",
+                    "size": "1",
+                    "port": ""
+                }
+            ]
+        },
+        {
+            "name": "saddr",
+            "size": "32",
+            "mode": "rw",
+            "init": "0",
+            "fields": [
+                {
+                    "name": "saddr",
+                    "from": "0",
+                    "size": "32",
+                    "port": ""
+                }
+            ]
+        },
+        {
+            "name": "daddr",
+            "size": "32",
+            "mode": "rw",
+            "init": "0",
+            "fields": [
+                {
+                    "name": "daddr",
+                    "from": "0",
+                    "size": "32",
+                    "port": ""
+                }
+            ]
+        },
+        {
+            "name": "count",
+            "size": "32",
+            "mode": "rw",
+            "init": "0",
+            "fields": [
+                {
+                    "name": "count",
+                    "from": "0",
+                    "size": "32",
+                    "port": ""
+                }
+            ]
+        },
+        {
+            "name": "swtrig",
+            "size": "1",
+            "mode": "rw",
+            "init": "0",
+            "fields": [
+                {
+                    "name": "swtrig",
+                    "from": "0",
+                    "size": "1",
+                    "port": ""
+                }
+            ]
+        }
+
+    ],
+    "clock": "HCLK",
+    "reset": {
+        "name": "HRESETn",
+        "pol": "0"
+    }
+
+}
