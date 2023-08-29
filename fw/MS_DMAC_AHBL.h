@@ -44,8 +44,9 @@
 #define DMAC_SWTRIG_REG_SWTRIG		0
 #define DMAC_SWTRIG_REG_SWTRIG_LEN	1
 
-volatile unsigned int * dmac_CONTROL_REG	= (volatile unsigned int *) DMAC_CONTROL_REG_ADDR;
-volatile unsigned int * dmac_SADDR_REG	= (volatile unsigned int *) DMAC_SADDR_REG_ADDR;
-volatile unsigned int * dmac_DADDR_REG	= (volatile unsigned int *) DMAC_DADDR_REG_ADDR;
-volatile unsigned int * dmac_COUNT_REG	= (volatile unsigned int *) DMAC_COUNT_REG_ADDR;
-volatile unsigned int * dmac_SWTRIG_REG	= (volatile unsigned int *) DMAC_SWTRIG_REG_ADDR;
+volatile unsigned int * dmac_control	= (volatile unsigned int *) DMAC_CONTROL_REG_ADDR;
+volatile unsigned int * dmac_status	= (volatile unsigned int *) DMAC_STATUS_REG_ADDR;
+volatile unsigned int * dmac_saddr	= (volatile unsigned int *) DMAC_SADDR_REG_ADDR;
+volatile unsigned int * dmac_daddr	= (volatile unsigned int *) DMAC_DADDR_REG_ADDR;
+volatile unsigned int * dmac_count	= (volatile unsigned int *) DMAC_COUNT_REG_ADDR;
+volatile unsigned int * dmac_swtrig	= (volatile unsigned int *) DMAC_SWTRIG_REG_ADDR;
