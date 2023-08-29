@@ -74,16 +74,6 @@
 
 
 `define     SLAVE_SIGNAL(signal, indx)    S``indx``_``signal``
-`define     AHB_SYS_EPILOGUE(DEC_BITS, DEC_BITS_CNT, NUM_SLAVES) \    
-    wire [DEC_BITS_CNT-1:0]     PAGE = HADDR[DEC_BITS]; \
-    reg  [DEC_BITS_CNT-1:0]     APAGE;\
-    wire [NUM_SLAVES-1:0]       AHSEL;\
-    always@ (posedge HCLK or negedge HRESETn) begin \
-    if(!HRESETn)\
-        APAGE <= DEC_BITS_CNT'h0;\
-    else if(HREADY)\
-        APAGE <= PAGE;\
-    end
 
 `define HSEL_GEN(SLAVE_ID)\
     assign ``SLAVE_ID``_HSEL    = (PAGE     == ``SLAVE_ID``_PAGE);\
