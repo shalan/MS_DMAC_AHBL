@@ -35,6 +35,7 @@
     10: Size Register
     14: SW Trigger
 */
+
 module MS_DMAC_AHBL (
     input               HCLK,
     input               HRESETn,
@@ -147,7 +148,9 @@ module MS_DMAC_AHBL (
         else if (TRIG_REG_sel) CNTR <= 16'h0;
         else if((state==WD_STATE) & M_HREADY & (CTRL_REG_SRC_AI | CTRL_REG_DEST_AI) & TRIG_REG) CNTR <= CNTR + 16'h1;
 
-    assign done = (CNTR == SIZE_REG);
+    
+
+    assign done = (CNTR == SIZE_REG) & CTRL_REG_EN;
 
     assign HREADYOUT = 1'b1;
 
