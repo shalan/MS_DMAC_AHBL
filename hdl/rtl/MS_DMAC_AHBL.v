@@ -37,10 +37,10 @@
 */
 
 module MS_DMAC_AHBL (
-    input               HCLK,
-    input               HRESETn,
+    input   wire    HCLK,
+    input   wire    HRESETn,
     
-    output wire         IRQ,
+    output  wire    IRQ,
 
     // AHB-Lite Slave Interface
     `AHB_SLAVE_IFC(),
