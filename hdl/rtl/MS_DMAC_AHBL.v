@@ -21,19 +21,20 @@
 
 /*
     DMA Controller
-    00: CTRL Register 
-        0: EN
-        1-4: Transfer tigger; only 0000 (S/W) is supported
-        8-9: Source data type; 0: byte, 1: half word, 2: word
-        10: Source Address Auto increment
-        16-17: Destination data type; 0: byte, 1: half word, 2: word
-        18: Destination Address Auto increment
-    04: Status Register
-        0: Done
-    08: SADDR Register
-    0C: DADDR Register
-    10: Size Register
-    14: SW Trigger
+    0x00:   CTRL Register 
+            0: EN
+            1-4: Transfer tigger; only 0000 (S/W) is supported
+            8-9: Source data type; 0: byte, 1: half word, 2: word
+            10: Source Address Auto increment
+            16-17: Destination data type; 0: byte, 1: half word, 2: word
+            18: Destination Address Auto increment
+    0x04:   Status Register
+            0: Done
+    0x08:   Source Address (SADDR) Register
+    0x0C:   Destination Address (DADDR) Register
+    0x10:   Frame Size (FSZ) Register
+    0x14:   SW Trigger (SW) Register 
+    0x18:   Frame Count (FC) Register
 */
 
 module MS_DMAC_AHBL (
@@ -46,7 +47,10 @@ module MS_DMAC_AHBL (
     `AHB_SLAVE_IFC(),
 
     // AHB-Lite Master Interface
-    `AHB_MASTER_IFC(M_)
+    `AHB_MASTER_IFC(M_),
+
+    // Peripherals IRQ lines
+    input   wire    PIRQ
 );
 
     localparam  CTRL_REG_OFF    =   8'h00, 
@@ -54,13 +58,14 @@ module MS_DMAC_AHBL (
                 SADDR_REG_OFF   =   8'h08,
                 DADDR_REG_OFF   =   8'h0C,
                 SIZE_REG_OFF    =   8'h10,
-                TRIG_REG_OFF    =   8'h14;
+                TRIG_REG_OFF    =   8'h14,
+                FC_REG_OFF      =   8'h18;
 
     wire [31:0] STATUS_REG;
     wire done;
 
     assign      STATUS_REG  = {31'h0,done};
-    assign      IRQ         = done;
+    assign      IRQ         = (CTRL_REG_TRIGGER == 4'b0) ?  done : (done & (FC_REG == 8'b1));
 
     //
     // AHB Slave Logic
@@ -72,7 +77,21 @@ module MS_DMAC_AHBL (
     `AHB_REG(SADDR_REG, 32, SADDR_REG_OFF, 0)
     `AHB_REG(DADDR_REG, 32, DADDR_REG_OFF, 0)
     `AHB_REG(SIZE_REG, 16, SIZE_REG_OFF, 0)
+    //`AHB_REG(FC_REG, 8, FC_REG_OFF, 0)
      
+    reg [7:0]       FC_REG;
+    wire FC_REG_sel = wr_enable & (last_HADDR[7:0] == FC_REG_OFF);
+    always @(posedge HCLK or negedge HRESETn)
+    begin
+        if (~HRESETn)
+            FC_REG <= 8'h0;
+        else if (FC_REG_sel)
+            FC_REG <= HWDATA[7:0];
+        else if(done && (state == WD_STATE))
+            FC_REG <= FC_REG - 1'b1;
+    end  
+
+
     reg             TRIG_REG;
     wire TRIG_REG_sel = wr_enable & (last_HADDR[7:0] == TRIG_REG_OFF);
     always @(posedge HCLK or negedge HRESETn)
@@ -100,11 +119,15 @@ module MS_DMAC_AHBL (
         `AHB_REG_READ(DADDR_REG, DADDR_REG_OFF)
         `AHB_REG_READ(SIZE_REG, SIZE_REG_OFF)
         `AHB_REG_READ(TRIG_REG, TRIG_REG_OFF)
+        `AHB_REG_READ(FC_REG, FC_REG_OFF)
         32'hDEADBEEF; 
 
     //
     // AHB MAster Logic
     //
+    
+    wire trigger =  (TRIG_REG && (CTRL_REG_TRIGGER == 4'b0)) ||
+                    (|(PIRQ & CTRL_REG_TRIGGER) != 1'b0);
 
     // The DMAC FSM
     localparam  IDLE_STATE  =   5'b00001,
@@ -121,7 +144,7 @@ module MS_DMAC_AHBL (
 
     always @*
         case(state)
-            IDLE_STATE: if(TRIG_REG & CTRL_REG_EN) 
+            IDLE_STATE: if(trigger & CTRL_REG_EN) 
                             nstate = RA_STATE; 
                         else 
                             nstate = IDLE_STATE;
@@ -144,11 +167,14 @@ module MS_DMAC_AHBL (
     wire [31:0] W_ADDR = CTRL_REG_DEST_AI ? (DADDR_REG + W_CNTR_TYPE) : DADDR_REG;
 
     always @(posedge HCLK or negedge HRESETn)
-        if(!HRESETn) CNTR <= 16'h0;
-        else if (TRIG_REG_sel) CNTR <= 16'h0;
-        else if((state==WD_STATE) & M_HREADY & (CTRL_REG_SRC_AI | CTRL_REG_DEST_AI) & TRIG_REG) CNTR <= CNTR + 16'h1;
-
-    
+        if(!HRESETn) 
+            CNTR <= 16'h0;
+        else if (TRIG_REG_sel) 
+            CNTR <= 16'h0;
+        else if(done && (state == WD_STATE))
+            CNTR <= 16'h0;
+        else if((state==WD_STATE) & M_HREADY & (CTRL_REG_SRC_AI | CTRL_REG_DEST_AI)/* & TRIG_REG*/) 
+            CNTR <= CNTR + 16'h1;
 
     assign done = (CNTR == SIZE_REG) & CTRL_REG_EN;
 
