@@ -23,11 +23,11 @@
     DMA Controller
     0x00:   CTRL Register 
             0: EN
-            1-4: Transfer tigger; only 0000 (S/W) is supported
-            8-9: Source data type; 0: byte, 1: half word, 2: word
-            10: Source Address Auto increment
-            16-17: Destination data type; 0: byte, 1: half word, 2: word
-            18: Destination Address Auto increment
+            8-11: Transfer tigger; only 0000 (S/W) is supported
+            16-17: Source data type; 0: byte, 1: half word, 2: word
+            10-20: Source Address Auto increment
+            24-25: Destination data type; 0: byte, 1: half word, 2: word
+            26-28: Destination Address Auto increment
     0x04:   Status Register
             0: Done
     0x08:   Source Address (SADDR) Register
@@ -35,6 +35,12 @@
     0x10:   Frame Size (FSZ) Register
     0x14:   SW Trigger (SW) Register 
     0x18:   Frame Count (FC) Register
+*/
+
+/*
+    To do:
+        - DEST_AI & SRC_AI fields to be updated to 3 bits each
+        - The increment steps are determined by DEST_AI & SRC_AI
 */
 
 module MS_DMAC_AHBL (
@@ -108,9 +114,9 @@ module MS_DMAC_AHBL (
     `REG_FIELD(CTRL_REG, EN, 0, 0)
     `REG_FIELD(CTRL_REG, TRIGGER, 8, 11)
     `REG_FIELD(CTRL_REG, SRC_TYPE, 16, 17)
-    `REG_FIELD(CTRL_REG, SRC_AI, 18, 18)
+    `REG_FIELD(CTRL_REG, SRC_AI, 18, 20)
     `REG_FIELD(CTRL_REG, DEST_TYPE, 24, 25)
-    `REG_FIELD(CTRL_REG, DEST_AI, 26, 26)
+    `REG_FIELD(CTRL_REG, DEST_AI, 26, 28)
 
     `AHB_READ
         `AHB_REG_READ(CTRL_REG, CTRL_REG_OFF)
@@ -161,10 +167,10 @@ module MS_DMAC_AHBL (
 
     // The Address Sequence Generator
     reg  [15:0] CNTR;
-    wire [17:0] R_CNTR_TYPE = CNTR << CTRL_REG_SRC_TYPE;
-    wire [17:0] W_CNTR_TYPE = CNTR << CTRL_REG_DEST_TYPE;
-    wire [31:0] R_ADDR = (CTRL_REG_SRC_AI) ? (SADDR_REG + R_CNTR_TYPE) : SADDR_REG;
-    wire [31:0] W_ADDR = CTRL_REG_DEST_AI ? (DADDR_REG + W_CNTR_TYPE) : DADDR_REG;
+    wire [17:0] R_CNTR_INC = CNTR << CTRL_REG_SRC_AI;        // change R_CNTR_TYPE to R_INC_STEP
+    wire [17:0] W_CNTR_INC = CNTR << CTRL_REG_DEST_AI;       // change W_CNTR_TYPE to W_INC_STEP
+    wire [31:0] R_ADDR = (CTRL_REG_SRC_AI != 0) ? (SADDR_REG + R_CNTR_INC) : SADDR_REG;
+    wire [31:0] W_ADDR = (CTRL_REG_DEST_AI != 0) ? (DADDR_REG + W_CNTR_INC) : DADDR_REG;
 
     always @(posedge HCLK or negedge HRESETn)
         if(!HRESETn) 
