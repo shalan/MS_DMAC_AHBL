@@ -25,9 +25,9 @@
             0: EN
             8-11: Transfer tigger; only 0000 (S/W) is supported
             16-17: Source data type; 0: byte, 1: half word, 2: word
-            10-20: Source Address Auto increment
+            10-20: Source Address Auto increment value (0, 1, 2, and 4)
             24-25: Destination data type; 0: byte, 1: half word, 2: word
-            26-28: Destination Address Auto increment
+            26-28: Destination Address Auto increment value (0, 1, 2, and 4)
     0x04:   Status Register
             0: Done
     0x08:   Source Address (SADDR) Register
@@ -167,10 +167,14 @@ module MS_DMAC_AHBL (
 
     // The Address Sequence Generator
     reg  [15:0] CNTR;
-    wire [17:0] R_CNTR_INC = CNTR << CTRL_REG_SRC_AI;        // change R_CNTR_TYPE to R_INC_STEP
-    wire [17:0] W_CNTR_INC = CNTR << CTRL_REG_DEST_AI;       // change W_CNTR_TYPE to W_INC_STEP
-    wire [31:0] R_ADDR = (CTRL_REG_SRC_AI != 0) ? (SADDR_REG + R_CNTR_INC) : SADDR_REG;
-    wire [31:0] W_ADDR = (CTRL_REG_DEST_AI != 0) ? (DADDR_REG + W_CNTR_INC) : DADDR_REG;
+    wire [17:0] R_CNTR  = (CTRL_REG_SRC_AI == 4) ? CNTR << 2 :
+                          (CTRL_REG_SRC_AI == 2) ? CNTR << 1 : 
+                          (CTRL_REG_SRC_AI == 1) ? CNTR      : CNTR;
+    wire [17:0] W_CNTR  = (CTRL_REG_DEST_AI == 4) ? CNTR << 2 :
+                          (CTRL_REG_DEST_AI == 2) ? CNTR << 1 : 
+                          (CTRL_REG_DEST_AI == 1) ? CNTR      : CNTR;
+    wire [31:0] R_ADDR = (CTRL_REG_SRC_AI != 0) ? (SADDR_REG + R_CNTR) : SADDR_REG;
+    wire [31:0] W_ADDR = (CTRL_REG_DEST_AI != 0) ? (DADDR_REG + W_CNTR) : DADDR_REG;
 
     always @(posedge HCLK or negedge HRESETn)
         if(!HRESETn) 
