@@ -10,9 +10,9 @@ void MS_DMAC_setSourceDataType(uint32_t dmac_base, int value);
 
 void MS_DMAC_setDestinationDataType (uint32_t dmac_base, int value);
 
-void MS_DMAC_sourceAddrAutoIncrement(uint32_t dmac_base, int value);
+// void MS_DMAC_sourceAddrAutoIncrement(uint32_t dmac_base, int value);
 
-void MS_DMAC_destinationAddrAutoIncrement(uint32_t dmac_base, int value);
+// void MS_DMAC_destinationAddrAutoIncrement(uint32_t dmac_base, int value);
  
 void MS_DMAC_setControlReg (uint32_t dmac_base, int value);
 
