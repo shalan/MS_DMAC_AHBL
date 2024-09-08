@@ -60,8 +60,13 @@
     reg             last_HWRITE; \
     reg [1:0]       last_HTRANS; \
     \
-    always@ (posedge HCLK) begin\
-        if(HREADY) begin\
+    always@ (posedge HCLK or negedge HRESETn) begin\
+        if(!HRESETn) begin \
+            last_HSEL       <= 0;   \
+            last_HADDR      <= 0;  \
+            last_HWRITE     <= 0; \
+            last_HTRANS     <= 0; \
+        end else if(HREADY) begin\
             last_HSEL       <= HSEL;   \
             last_HADDR      <= HADDR;  \
             last_HWRITE     <= HWRITE; \
