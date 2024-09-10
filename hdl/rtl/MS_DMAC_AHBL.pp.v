@@ -254,10 +254,11 @@ module MS_DMAC_AHBL (
     always @(posedge HCLK)
         if((state == RD_STATE) & M_HREADY)
             rdata <= M_HRDATA;
+    wire [31:0] aligned_rdata = (CTRL_REG_SRC_TYPE == 2 & CTRL_REG_DEST_TYPE == 1 & M_HADDR[1]) ? {rdata[15:0], rdata[15:0]} : rdata; // case when moving only the first half words from 2 words into 1 word
 
     assign M_HADDR = (state == RA_STATE) ? R_ADDR : W_ADDR;
     assign M_HTRANS =  M_HREADY & ((state == RA_STATE) || (state == WA_STATE)) ? 2'h2 : 2'h0;
-    assign M_HWDATA = (state == WD_STATE)  ? rdata : 32'hEEEEEEEE;
+    assign M_HWDATA = (state == WD_STATE)  ? aligned_rdata : 32'hEEEEEEEE;
     assign M_HWRITE = (state == WA_STATE)  ? 1'b1 : 1'b0; 
     assign M_HSIZE = (state == RA_STATE) ? CTRL_REG_SRC_TYPE : CTRL_REG_DEST_TYPE;
 
