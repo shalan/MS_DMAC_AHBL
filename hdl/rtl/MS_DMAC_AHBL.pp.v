@@ -102,8 +102,13 @@ module MS_DMAC_AHBL (
     reg             last_HWRITE;
     reg [1:0]       last_HTRANS;
 
-    always@ (posedge HCLK) begin
-        if(HREADY) begin
+    always@ (posedge HCLK or negedge HRESETn) begin
+        if(!HRESETn) begin
+            last_HSEL       <= 0;
+            last_HADDR      <= 0;
+            last_HWRITE     <= 0;
+            last_HTRANS     <= 0;
+        end else if(HREADY) begin
             last_HSEL       <= HSEL;
             last_HADDR      <= HADDR;
             last_HWRITE     <= HWRITE;
@@ -171,11 +176,11 @@ module MS_DMAC_AHBL (
     
     wire [17-16:0] CTRL_REG_SRC_TYPE = CTRL_REG[17:16];
     
-    wire [18-18:0] CTRL_REG_SRC_AI = CTRL_REG[18:18];
+    wire [20-18:0] CTRL_REG_SRC_AI = CTRL_REG[20:18];
     
     wire [25-24:0] CTRL_REG_DEST_TYPE = CTRL_REG[25:24];
     
-    wire [26-26:0] CTRL_REG_DEST_AI = CTRL_REG[26:26];
+    wire [28-26:0] CTRL_REG_DEST_AI = CTRL_REG[28:26];
 
     assign HRDATA =
         (last_HADDR[15:0] == CTRL_REG_OFF) ? CTRL_REG :
@@ -218,19 +223,24 @@ module MS_DMAC_AHBL (
                             else  
                                 nstate = RA_STATE; 
                         end else nstate = WD_STATE;
+            default: nstate = state;
         endcase 
 
     // The Address Sequence Generator
     reg  [15:0] CNTR;
-    wire [17:0] R_CNTR_TYPE = CNTR << CTRL_REG_SRC_TYPE;
-    wire [17:0] W_CNTR_TYPE = CNTR << CTRL_REG_DEST_TYPE;
-    wire [31:0] R_ADDR = (CTRL_REG_SRC_AI) ? (SADDR_REG + R_CNTR_TYPE) : SADDR_REG;
-    wire [31:0] W_ADDR = CTRL_REG_DEST_AI ? (DADDR_REG + W_CNTR_TYPE) : DADDR_REG;
+    wire [17:0] R_CNTR = (CTRL_REG_SRC_AI == 4) ? CNTR << 2 :
+                          (CTRL_REG_SRC_AI == 2) ? CNTR << 1 : 
+                          (CTRL_REG_SRC_AI == 1) ? CNTR      : CNTR;
+    wire [17:0] W_CNTR  = (CTRL_REG_DEST_AI == 4) ? CNTR << 2 :
+                          (CTRL_REG_DEST_AI == 2) ? CNTR << 1 : 
+                          (CTRL_REG_DEST_AI == 1) ? CNTR      : CNTR;
+    wire [31:0] R_ADDR = (CTRL_REG_SRC_AI != 0) ? (SADDR_REG + R_CNTR) : SADDR_REG;
+    wire [31:0] W_ADDR = (CTRL_REG_DEST_AI != 0) ? (DADDR_REG + W_CNTR) : DADDR_REG;
 
     always @(posedge HCLK or negedge HRESETn)
         if(!HRESETn) CNTR <= 16'h0;
         else if (TRIG_REG_sel) CNTR <= 16'h0;
-        else if((state==WD_STATE) & M_HREADY & (CTRL_REG_SRC_AI | CTRL_REG_DEST_AI) & TRIG_REG) CNTR <= CNTR + 16'h1;
+        else if((state==WD_STATE) & M_HREADY & ((CTRL_REG_SRC_AI!=0) || (CTRL_REG_DEST_AI!=0)) & TRIG_REG) CNTR <= CNTR + 16'h1;
 
     
 
@@ -244,10 +254,11 @@ module MS_DMAC_AHBL (
     always @(posedge HCLK)
         if((state == RD_STATE) & M_HREADY)
             rdata <= M_HRDATA;
+    wire [31:0] aligned_rdata = (CTRL_REG_SRC_TYPE == 2 & CTRL_REG_DEST_TYPE == 1 & M_HADDR[1]) ? {rdata[15:0], rdata[15:0]} : rdata; // case when moving only the first half words from 2 words into 1 word
 
     assign M_HADDR = (state == RA_STATE) ? R_ADDR : W_ADDR;
     assign M_HTRANS =  M_HREADY & ((state == RA_STATE) || (state == WA_STATE)) ? 2'h2 : 2'h0;
-    assign M_HWDATA = (state == WD_STATE)  ? rdata : 32'hEEEEEEEE;
+    assign M_HWDATA = (state == WD_STATE)  ? aligned_rdata : 32'hEEEEEEEE;
     assign M_HWRITE = (state == WA_STATE)  ? 1'b1 : 1'b0; 
     assign M_HSIZE = (state == RA_STATE) ? CTRL_REG_SRC_TYPE : CTRL_REG_DEST_TYPE;
 
